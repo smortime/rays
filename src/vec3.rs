@@ -1,7 +1,7 @@
 use core::fmt;
 use std::ops;
 
-type Point3 = Vec3;
+pub(crate) type Point3 = Vec3;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct Vec3 {
@@ -13,7 +13,7 @@ impl Vec3 {
         Vec3 { e: [e0, e1, e2] }
     }
 
-    fn origin() -> Self {
+    pub(crate) fn origin() -> Self {
         Vec3 { e: [0.0, 0.0, 0.0] }
     }
 
@@ -47,6 +47,10 @@ impl Vec3 {
             self[2] * rhs[0] - self[0] * rhs[2],
             self[0] * rhs[1] - self[1] * rhs[0],
         )
+    }
+
+    pub(crate) fn unit_vector(&self) -> Vec3 {
+        *self / self.length()
     }
 }
 
