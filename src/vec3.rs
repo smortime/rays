@@ -37,7 +37,7 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    fn dot(&self, rhs: &Vec3) -> f32 {
+    pub(crate) fn dot(&self, rhs: &Vec3) -> f32 {
         self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
     }
 
