@@ -29,7 +29,7 @@ impl Vec3 {
         self[2]
     }
 
-    fn length_squared(&self) -> f32 {
+    pub(crate) fn length_squared(&self) -> f32 {
         self[0].powi(2) + self[1].powi(2) + self[2].powi(2)
     }
 
