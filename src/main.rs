@@ -1,33 +1,30 @@
 mod color;
+mod hittable;
+mod hittable_list;
 mod ray;
+mod sphere;
+mod utility;
 mod vec3;
 
 use crate::vec3::Vec3;
 use color::write_color;
+use hittable::Hittable;
+use hittable_list::HittableList;
 use ray::Ray;
+use sphere::Sphere;
 use vec3::Point3;
 
 use crate::color::Color;
-use std::{fs::File, io::BufWriter, io::Write};
+use core::f32;
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+    rc::Rc,
+};
 
-fn hit_sphere(center: &Point3, radius: f32, r: &Ray) -> f32 {
-    let oc = *center - r.origin();
-    let a = r.direction().length_squared();
-    let h = r.direction().dot(&oc);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = h * h - a * c;
-    if discriminant <= 0.0 {
-        -1.0
-    } else {
-        (h - discriminant.sqrt()) / a
-    }
-}
-
-fn ray_color(r: Ray) -> Color {
-    let t = hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, &r);
-    if t > 0.0 {
-        let n = (r.at(t) - Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        return 0.5 * Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0);
+fn ray_color(r: Ray, world: &dyn Hittable) -> Color {
+    if let Some(rec) = world.hit(&r, 0.0, f32::INFINITY) {
+        return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
     }
     let unit_direction = r.direction().unit_vector();
     let a = 0.5 * (unit_direction.y() + 1.0);
@@ -43,6 +40,11 @@ fn main() {
     if image_height < 1 {
         image_height = 1;
     }
+
+    // World
+    let mut world = HittableList::empty();
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     // Camera
     let focal_length = 1.0;
@@ -76,7 +78,7 @@ fn main() {
                 pixel00_loc + (pixel_delta_u * i as f32) + (pixel_delta_v * j as f32);
             let ray_direction = pixel_center - camera_center;
             let r = Ray::new(camera_center, ray_direction);
-            let pixel_color = ray_color(r);
+            let pixel_color = ray_color(r, &world);
             write_color(&mut buffer, pixel_color);
         }
     }
