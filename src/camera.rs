@@ -123,7 +123,7 @@ impl Camera {
         }
         if let Some(rec) = world.hit(r, &Interval::new(0.001, f64::INFINITY)) {
             let direction = rec.normal + Vec3::random_unit_vector();
-            return 0.5 * Self::ray_color(&Ray::new(rec.p, direction), world, depth - 1);
+            return 0.6 * Self::ray_color(&Ray::new(rec.p, direction), world, depth - 1);
         }
         let unit_direction = r.direction().unit_vector();
         let a = 0.5 * (unit_direction.y() + 1.0);
