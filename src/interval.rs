@@ -1,33 +1,33 @@
-use core::f32;
+use core::f64;
 
 #[derive(Debug)]
 pub(crate) struct Interval {
-    pub(crate) min: f32,
-    pub(crate) max: f32,
+    pub(crate) min: f64,
+    pub(crate) max: f64,
 }
 
 impl Interval {
-    pub(crate) fn new(min: f32, max: f32) -> Self {
+    pub(crate) fn new(min: f64, max: f64) -> Self {
         Self { min, max }
     }
 
     pub(crate) fn empty() -> Self {
-        Self::new(f32::INFINITY, -f32::INFINITY)
+        Self::new(f64::INFINITY, -f64::INFINITY)
     }
 
-    pub(crate) fn size(&self) -> f32 {
+    pub(crate) fn size(&self) -> f64 {
         self.max - self.min
     }
 
-    pub(crate) fn contains(&self, x: f32) -> bool {
+    pub(crate) fn contains(&self, x: f64) -> bool {
         self.min <= x && x <= self.max
     }
 
-    pub(crate) fn surrounds(&self, x: f32) -> bool {
+    pub(crate) fn surrounds(&self, x: f64) -> bool {
         self.min < x && x < self.max
     }
 
-    pub(crate) fn clamp(&self, x: f32) -> f32 {
+    pub(crate) fn clamp(&self, x: f64) -> f64 {
         if x < self.min {
             self.min
         } else if x > self.max {

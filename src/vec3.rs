@@ -1,43 +1,76 @@
 use core::fmt;
 use std::ops;
 
+use crate::utility::{random_f64, random_f64_range};
+
 pub(crate) type Point3 = Vec3;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct Vec3 {
-    e: [f32; 3],
+    e: [f64; 3],
 }
 
 impl Vec3 {
-    pub(crate) fn new(e0: f32, e1: f32, e2: f32) -> Self {
-        Vec3 { e: [e0, e1, e2] }
+    pub(crate) fn new(e0: f64, e1: f64, e2: f64) -> Self {
+        Self { e: [e0, e1, e2] }
     }
 
     pub(crate) fn origin() -> Self {
-        Vec3 { e: [0.0, 0.0, 0.0] }
+        Self::new(0.0, 0.0, 0.0)
     }
 
-    pub(crate) fn x(&self) -> f32 {
+    pub(crate) fn random() -> Self {
+        Self::new(random_f64(), random_f64(), random_f64())
+    }
+
+    pub(crate) fn random_range(min: f64, max: f64) -> Self {
+        Self::new(
+            random_f64_range(min, max),
+            random_f64_range(min, max),
+            random_f64_range(min, max),
+        )
+    }
+
+    pub(crate) fn random_unit_vector() -> Self {
+        loop {
+            let p = Self::random_range(-1.0, 1.0);
+            let lensq = p.length_squared();
+            if 1e-160 < lensq && lensq <= 1.0 {
+                return p / lensq.sqrt();
+            }
+        }
+    }
+
+    pub(crate) fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
+        let on_unit_sphere = Self::random_unit_vector();
+        if on_unit_sphere.dot(normal) > 0.0 {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
+    }
+
+    pub(crate) fn x(&self) -> f64 {
         self[0]
     }
 
-    pub(crate) fn y(&self) -> f32 {
+    pub(crate) fn y(&self) -> f64 {
         self[1]
     }
 
-    pub(crate) fn z(&self) -> f32 {
+    pub(crate) fn z(&self) -> f64 {
         self[2]
     }
 
-    pub(crate) fn length_squared(&self) -> f32 {
+    pub(crate) fn length_squared(&self) -> f64 {
         self[0].powi(2) + self[1].powi(2) + self[2].powi(2)
     }
 
-    fn length(&self) -> f32 {
+    fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    pub(crate) fn dot(&self, rhs: &Vec3) -> f32 {
+    pub(crate) fn dot(&self, rhs: &Vec3) -> f64 {
         self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
     }
 
@@ -63,7 +96,7 @@ impl ops::Neg for Vec3 {
 }
 
 impl ops::Index<usize> for Vec3 {
-    type Output = f32;
+    type Output = f64;
 
     fn index(&self, index: usize) -> &Self::Output {
         if index > 2 {
@@ -103,15 +136,15 @@ impl ops::Mul for Vec3 {
     }
 }
 
-impl ops::Mul<f32> for Vec3 {
+impl ops::Mul<f64> for Vec3 {
     type Output = Vec3;
 
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: f64) -> Self::Output {
         Vec3::new(self[0] * rhs, self[1] * rhs, self[2] * rhs)
     }
 }
 
-impl ops::Mul<Vec3> for f32 {
+impl ops::Mul<Vec3> for f64 {
     type Output = Vec3;
 
     fn mul(self, rhs: Vec3) -> Self::Output {
@@ -119,10 +152,10 @@ impl ops::Mul<Vec3> for f32 {
     }
 }
 
-impl ops::Div<f32> for Vec3 {
+impl ops::Div<f64> for Vec3 {
     type Output = Vec3;
 
-    fn div(self, rhs: f32) -> Self::Output {
+    fn div(self, rhs: f64) -> Self::Output {
         self * (1.0 / rhs)
     }
 }
@@ -139,16 +172,16 @@ impl ops::AddAssign for Vec3 {
     }
 }
 
-impl ops::MulAssign<f32> for Vec3 {
-    fn mul_assign(&mut self, rhs: f32) {
+impl ops::MulAssign<f64> for Vec3 {
+    fn mul_assign(&mut self, rhs: f64) {
         self.e[0] *= rhs;
         self.e[1] *= rhs;
         self.e[2] *= rhs;
     }
 }
 
-impl ops::DivAssign<f32> for Vec3 {
-    fn div_assign(&mut self, rhs: f32) {
+impl ops::DivAssign<f64> for Vec3 {
+    fn div_assign(&mut self, rhs: f64) {
         *self *= 1.0 / rhs;
     }
 }
@@ -178,7 +211,7 @@ mod tests {
 
         // lengths
         assert_eq!(v.length_squared(), 14.0);
-        assert_eq!(v.length(), 14.0_f32.sqrt());
+        assert_eq!(v.length(), 14.0_f64.sqrt());
 
         // dot & cross
         let u = Vec3::new(3.0, 1.0, 2.0);

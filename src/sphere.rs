@@ -8,14 +8,14 @@ use crate::{
 #[derive(Debug)]
 pub(crate) struct Sphere {
     center: Point3,
-    radius: f32,
+    radius: f64,
 }
 
 impl Sphere {
-    pub(crate) fn new(center: Point3, radius: f32) -> Self {
+    pub(crate) fn new(center: Point3, radius: f64) -> Self {
         Self {
             center,
-            radius: f32::max(radius, 0.0),
+            radius: f64::max(radius, 0.0),
         }
     }
 }

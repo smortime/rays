@@ -13,9 +13,9 @@ pub(crate) fn write_color(buff: &mut BufWriter<File>, pixel_color: Color) {
 
     // Translate the [0,1] component values to the byte range [0, 255]
     let intensity = Interval::new(0.000, 0.999);
-    let rbyte = (256.0 * intensity.clamp(r)) as i32;
-    let gbyte = (256.0 * intensity.clamp(g)) as i32;
-    let bbyte = (256.0 * intensity.clamp(b)) as i32;
+    let rbyte = (256.0 * intensity.clamp(r)) as i64;
+    let gbyte = (256.0 * intensity.clamp(g)) as i64;
+    let bbyte = (256.0 * intensity.clamp(b)) as i64;
 
     buff.write_all(format!("{rbyte} {gbyte} {bbyte}\n").as_bytes())
         .unwrap();

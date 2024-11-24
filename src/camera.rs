@@ -8,29 +8,36 @@ use crate::{
     hittable::Hittable,
     interval::Interval,
     ray::Ray,
-    utility::random_f32,
+    utility::random_f64,
     vec3::{Point3, Vec3},
 };
 
 #[derive(Debug)]
 pub(crate) struct Camera {
-    aspect_ratio: f32,
-    image_width: i32,
-    image_height: i32,
+    aspect_ratio: f64,
+    image_width: i64,
+    image_height: i64,
     center: Point3,
     pixel00_loc: Point3,
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
-    samples_per_pixel: i32,
-    pixel_samples_scale: f32,
+    samples_per_pixel: i64,
+    pixel_samples_scale: f64,
+    max_depth: i64,
 }
 
 impl Camera {
-    pub(crate) fn new(aspect_ratio: f32, image_width: i32, samples_per_pixel: i32) -> Self {
+    pub(crate) fn new(
+        aspect_ratio: f64,
+        image_width: i64,
+        samples_per_pixel: i64,
+        max_depth: i64,
+    ) -> Self {
         Self {
             aspect_ratio,
             image_width,
             samples_per_pixel,
+            max_depth,
             image_height: 0,
             center: Point3::origin(),
             pixel00_loc: Point3::origin(),
@@ -57,7 +64,7 @@ impl Camera {
                 let mut pixel_color = Color::origin();
                 for _ in 0..self.samples_per_pixel {
                     let r: Ray = self.get_ray(i, j);
-                    pixel_color += Camera::ray_color(&r, &world);
+                    pixel_color += Camera::ray_color(&r, &world, self.max_depth);
                 }
                 write_color(&mut buffer, pixel_color * self.pixel_samples_scale);
             }
@@ -67,18 +74,18 @@ impl Camera {
 
     fn initialize(&mut self) {
         // Calculate image_height and ensure at least 1
-        let mut image_height = (self.image_width as f32 / self.aspect_ratio) as i32;
+        let mut image_height = (self.image_width as f64 / self.aspect_ratio) as i64;
         if image_height < 1 {
             image_height = 1;
         }
         self.image_height = image_height;
 
-        self.pixel_samples_scale = 1.0 / self.samples_per_pixel as f32;
+        self.pixel_samples_scale = 1.0 / self.samples_per_pixel as f64;
 
         // Camera
         let focal_length = 1.0;
         let viewport_height = 2.0;
-        let viewport_width = viewport_height * (self.image_width as f32 / image_height as f32);
+        let viewport_width = viewport_height * (self.image_width as f64 / image_height as f64);
         self.center = Point3::origin();
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges
@@ -86,8 +93,8 @@ impl Camera {
         let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
 
         // Calculate the horizontal and veritcal delta vectors from pixel to pixel
-        self.pixel_delta_u = viewport_u / self.image_width as f32;
-        self.pixel_delta_v = viewport_v / image_height as f32;
+        self.pixel_delta_u = viewport_u / self.image_width as f64;
+        self.pixel_delta_v = viewport_v / image_height as f64;
 
         // Calculate the location of the upper left pixel
         let viewport_upper_left =
@@ -95,11 +102,11 @@ impl Camera {
         self.pixel00_loc = viewport_upper_left + 0.5 * (self.pixel_delta_u + self.pixel_delta_v);
     }
 
-    fn get_ray(&self, i: i32, j: i32) -> Ray {
+    fn get_ray(&self, i: i64, j: i64) -> Ray {
         let offset = Camera::sample_square();
         let pixel_sample = self.pixel00_loc
-            + ((i as f32 + offset.x()) * self.pixel_delta_u)
-            + ((j as f32 + offset.y()) * self.pixel_delta_v);
+            + ((i as f64 + offset.x()) * self.pixel_delta_u)
+            + ((j as f64 + offset.y()) * self.pixel_delta_v);
 
         let ray_origin = self.center;
         let ray_direction = pixel_sample - ray_origin;
@@ -107,12 +114,16 @@ impl Camera {
     }
 
     fn sample_square() -> Vec3 {
-        Vec3::new(random_f32() - 0.5, random_f32() - 0.5, 0.0)
+        Vec3::new(random_f64() - 0.5, random_f64() - 0.5, 0.0)
     }
 
-    fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
-        if let Some(rec) = world.hit(r, &Interval::new(0.0, f32::INFINITY)) {
-            return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
+    fn ray_color(r: &Ray, world: &dyn Hittable, depth: i64) -> Color {
+        if depth < 0 {
+            return Color::origin();
+        }
+        if let Some(rec) = world.hit(r, &Interval::new(0.0, f64::INFINITY)) {
+            let direction = Vec3::random_on_hemisphere(&rec.normal);
+            return 0.5 * Self::ray_color(&Ray::new(rec.p, direction), world, depth - 1);
         }
         let unit_direction = r.direction().unit_vector();
         let a = 0.5 * (unit_direction.y() + 1.0);

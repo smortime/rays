@@ -8,7 +8,7 @@ use crate::{
 pub(crate) struct HitRecord {
     pub(crate) p: Point3,
     pub(crate) normal: Vec3,
-    pub(crate) t: f32,
+    pub(crate) t: f64,
     pub(crate) front_face: bool,
 }
 
