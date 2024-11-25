@@ -122,6 +122,11 @@ impl Camera {
             return Color::origin();
         }
         if let Some(rec) = world.hit(r, &Interval::new(0.001, f64::INFINITY)) {
+            if let Some(m) = &rec.mat {
+                if let Some((s, a)) = m.scatter(r, &rec) {
+                    return a * Self::ray_color(&s, world, depth - 1);
+                }
+            }
             let direction = rec.normal + Vec3::random_unit_vector();
             return 0.6 * Self::ray_color(&Ray::new(rec.p, direction), world, depth - 1);
         }
