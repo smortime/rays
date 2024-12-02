@@ -23,6 +23,19 @@ impl Vec3 {
         Self::new(random_f64(), random_f64(), random_f64())
     }
 
+    pub(crate) fn random_in_unit_disk() -> Self {
+        loop {
+            let p = Self::new(
+                random_f64_range(-1.0, 1.0),
+                random_f64_range(-1.0, 1.0),
+                0.0,
+            );
+            if p.length_squared() < 1.0 {
+                return p;
+            }
+        }
+    }
+
     pub(crate) fn random_range(min: f64, max: f64) -> Self {
         Self::new(
             random_f64_range(min, max),
@@ -66,7 +79,7 @@ impl Vec3 {
         self[0].powi(2) + self[1].powi(2) + self[2].powi(2)
     }
 
-    fn length(&self) -> f64 {
+    pub(crate) fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
@@ -74,7 +87,7 @@ impl Vec3 {
         self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
     }
 
-    fn cross(&self, rhs: &Vec3) -> Vec3 {
+    pub(crate) fn cross(&self, rhs: &Vec3) -> Vec3 {
         Vec3::new(
             self[1] * rhs[2] - self[2] * rhs[1],
             self[2] * rhs[0] - self[0] * rhs[2],
@@ -93,6 +106,14 @@ impl Vec3 {
 
     pub(crate) fn reflection(&self, n: &Vec3) -> Vec3 {
         *self - 2.0 * self.dot(n) * *n
+    }
+
+    pub(crate) fn refract(&self, n: &Vec3, etai_over_etat: f64) -> Vec3 {
+        let uv = -*self;
+        let cos_theta = f64::min(uv.dot(n), 1.0);
+        let r_out_perp = etai_over_etat * (uv + cos_theta * *n);
+        let r_out_parallel = -((1.0 - r_out_perp.length_squared()).abs()).sqrt() * *n;
+        r_out_perp + r_out_parallel
     }
 }
 
