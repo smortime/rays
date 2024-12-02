@@ -54,15 +54,6 @@ impl Vec3 {
         }
     }
 
-    pub(crate) fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
-        let on_unit_sphere = Self::random_unit_vector();
-        if on_unit_sphere.dot(normal) > 0.0 {
-            on_unit_sphere
-        } else {
-            -on_unit_sphere
-        }
-    }
-
     pub(crate) fn x(&self) -> f64 {
         self[0]
     }
@@ -84,20 +75,15 @@ impl Vec3 {
     }
 
     pub(crate) fn dot(&self, rhs: &Vec3) -> f64 {
-        self[0] * rhs[0] + self[1] * rhs[1] + self[2] * rhs[2]
+        self.x() * rhs.x() + self.y() * rhs.y() + self.z() * rhs.z()
     }
 
     pub(crate) fn cross(&self, rhs: &Vec3) -> Vec3 {
         Vec3::new(
-            self[1] * rhs[2] - self[2] * rhs[1],
-            self[2] * rhs[0] - self[0] * rhs[2],
-            self[0] * rhs[1] - self[1] * rhs[0],
+            self.y() * rhs.z() - self.z() * rhs.y(),
+            self.z() * rhs.x() - self.x() * rhs.z(),
+            self.x() * rhs.y() - self.y() * rhs.x(),
         )
-    }
-
-    pub(crate) fn near_zero(&self) -> bool {
-        let s = 1e-8;
-        (self.x().abs() < s) && (self.y().abs() < s) && (self.z().abs() < s)
     }
 
     pub(crate) fn unit_vector(&self) -> Vec3 {

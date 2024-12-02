@@ -102,11 +102,8 @@ impl Camera {
 
     fn initialize(&mut self) {
         // Calculate image_height and ensure at least 1
-        let mut image_height = (self.image_width as f64 / self.aspect_ratio) as i64;
-        if image_height < 1 {
-            image_height = 1;
-        }
-        self.image_height = image_height;
+        let image_height = (self.image_width as f64 / self.aspect_ratio) as i64;
+        self.image_height = if image_height < 1 { 1 } else { image_height };
 
         self.pixel_samples_scale = 1.0 / self.samples_per_pixel as f64;
 
@@ -125,11 +122,11 @@ impl Camera {
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges
         let viewport_u = viewport_width * self.u;
-        let viewport_v = viewport_height * self.v;
+        let viewport_v = viewport_height * -self.v;
 
         // Calculate the horizontal and veritcal delta vectors from pixel to pixel
         self.pixel_delta_u = viewport_u / self.image_width as f64;
-        self.pixel_delta_v = viewport_v / image_height as f64;
+        self.pixel_delta_v = viewport_v / self.image_height as f64;
 
         // Calculate the location of the upper left pixel
         let viewport_upper_left =

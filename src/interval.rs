@@ -11,18 +11,6 @@ impl Interval {
         Self { min, max }
     }
 
-    pub(crate) fn empty() -> Self {
-        Self::new(f64::INFINITY, -f64::INFINITY)
-    }
-
-    pub(crate) fn size(&self) -> f64 {
-        self.max - self.min
-    }
-
-    pub(crate) fn contains(&self, x: f64) -> bool {
-        self.min <= x && x <= self.max
-    }
-
     pub(crate) fn surrounds(&self, x: f64) -> bool {
         self.min < x && x < self.max
     }

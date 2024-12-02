@@ -1,7 +1,7 @@
 use crate::{color::Color, hittable::HitRecord, ray::Ray, utility::random_f64, vec3::Vec3};
 
 pub(crate) trait Material {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
+    fn scatter(&self, _r_in: &Ray, _recc: &HitRecord) -> Option<(Ray, Color)> {
         None
     }
 }
@@ -17,7 +17,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
+    fn scatter(&self, _r_in: &Ray, rec: &HitRecord) -> Option<(Ray, Color)> {
         let scattered_direction = rec.normal + Vec3::random_unit_vector();
         let scattered = Ray::new(rec.p, scattered_direction);
         Some((scattered, self.albedo))
@@ -33,7 +33,7 @@ impl Metal {
     pub(crate) fn new(albedo: Color, fuzz: f64) -> Self {
         Self {
             albedo,
-            fuzz: if fuzz < 1.0 { 1.0 } else { fuzz },
+            fuzz: if fuzz >= 1.0 { 1.0 } else { fuzz },
         }
     }
 }

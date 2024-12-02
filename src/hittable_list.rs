@@ -17,16 +17,6 @@ impl HittableList {
         }
     }
 
-    pub(crate) fn new(object: Rc<dyn Hittable>) -> Self {
-        Self {
-            objects: vec![object],
-        }
-    }
-
-    pub(crate) fn clear(&mut self) {
-        self.objects.clear();
-    }
-
     pub(crate) fn add(&mut self, object: Rc<dyn Hittable>) {
         self.objects.push(object);
     }

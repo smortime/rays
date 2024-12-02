@@ -11,5 +11,5 @@ pub(crate) fn random_f64_range(min: f64, max: f64) -> f64 {
 }
 
 pub(crate) fn degrees_to_radians(degrees: f64) -> f64 {
-    degrees / f64::consts::PI / 180.0
+    degrees * f64::consts::PI / 180.0
 }
